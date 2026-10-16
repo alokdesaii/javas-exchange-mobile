@@ -18,14 +18,24 @@ if (typeof document !== 'undefined') {
   css.textContent = `input{outline:none}
 input:-webkit-autofill,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #fff inset;-webkit-text-fill-color:${c.ink};transition:background-color 9999s}`;
   document.head.appendChild(css);
+  // Design preview: print any crash on the page so a blank phone screen tells us why.
+  const show = (msg: string) => {
+    const el = document.createElement('pre');
+    el.style.cssText = 'position:fixed;inset:auto 0 0 0;z-index:9999;margin:0;padding:12px;max-height:50vh;overflow:auto;background:#c0414c;color:#fff;font:12px/1.4 monospace;white-space:pre-wrap';
+    el.textContent = msg;
+    document.body.appendChild(el);
+  };
+  window.addEventListener('error', e => show(`${e.message}\n${e.error?.stack ?? ''}`));
+  window.addEventListener('unhandledrejection', e => show(`Unhandled: ${e.reason?.stack ?? e.reason}`));
 }
 
 export default function App() {
-  const [loaded] = useFonts({ Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold, JetBrainsMono_500Medium });
+  const [loaded, fontError] = useFonts({ Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold, JetBrainsMono_500Medium });
   const [splash, setSplash] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
   const [tab, setTab] = useState<Tab>('Home');
-  if (!loaded) return null;
+  // Font failure (e.g. a slow load timing out in iOS WebKit) falls back to system fonts instead of a blank screen.
+  if (!loaded && !fontError) return null;
   // ponytail: state-based screen switching, fine for a design prototype — move to expo-router if it becomes a real app.
   return (
     // Phone-width frame so desktop browsers show the mobile layout; no-op on devices.
