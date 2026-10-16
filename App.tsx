@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold, Outfit_700Bold } from '@expo-google-fonts/outfit';
 import { JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
@@ -35,7 +35,8 @@ export default function App() {
   const [signedIn, setSignedIn] = useState(false);
   const [tab, setTab] = useState<Tab>('Home');
   // Font failure (e.g. a slow load timing out in iOS WebKit) falls back to system fonts instead of a blank screen.
-  if (!loaded && !fontError) return null;
+  // Web doesn't wait: the splash covers the ~3s it takes fonts to arrive on a phone connection.
+  if (!loaded && !fontError && Platform.OS !== 'web') return null;
   // ponytail: state-based screen switching, fine for a design prototype — move to expo-router if it becomes a real app.
   return (
     // Phone-width frame so desktop browsers show the mobile layout; no-op on devices.
