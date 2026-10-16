@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { c, f, t } from '../theme';
-import { Corners, CutButton } from '../components/Ledger';
+import { CutButton } from '../components/Ledger';
 import Logo from '../components/Logo';
 
 function Field({ label, secure, hint, placeholder, prefix }: { label: string; secure?: boolean; hint?: string; placeholder?: string; prefix?: string }) {
@@ -37,26 +37,13 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
   return (
     <ScrollView contentContainerStyle={s.wrap} keyboardShouldPersistTaps="handled">
       <View style={s.top}>
-        <View style={s.brand}>
-          <Logo size={28} />
-          <Text style={s.brandText}>JAVAS <Text style={{ fontFamily: f.light }}>EXCHANGE</Text></Text>
-        </View>
         <View style={s.lang}><Text style={s.langText}>EN</Text><Ionicons name="chevron-down" size={12} color={c.ink2} /></View>
       </View>
 
-      <View style={s.rate}>
-        <Corners color={c.deep} />
-        <Text style={s.meta}>USDT / HKD · DESK RATE</Text>
-        <View style={s.rateRow}>
-          <Text style={s.rateVal}>7.8241</Text>
-          <Text style={s.gain}>▲ 4 bps · 24h</Text>
-        </View>
-        <View style={s.band}><View style={[s.bandDot, { left: '49%' }]} /></View>
-        <View style={s.rateRow}>
-          <Text style={s.bandEnd}>7.7500</Text>
-          <Text style={s.meta}>Linked Exchange Rate band</Text>
-          <Text style={s.bandEnd}>7.8500</Text>
-        </View>
+      <View style={s.hero}>
+        <Logo size={88} />
+        <Text style={s.brandText}>JAVAS <Text style={{ fontFamily: f.light }}>EXCHANGE</Text></Text>
+        <Text style={s.tagline}>The stablecoin desk for Hong Kong.</Text>
       </View>
 
       <View style={s.tabs}>
@@ -69,8 +56,6 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
 
       {tab === 'in' ? (
         <>
-          <Text style={s.h1}>Welcome back</Text>
-          <Text style={s.sub}>Sign in to the Javas Exchange desk.</Text>
           <Field label="Email address" placeholder="you@company.com.hk" />
           <Field label="Password" secure />
           <View style={s.between}>
@@ -126,19 +111,13 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
 
 const s = StyleSheet.create({
   wrap: { paddingHorizontal: 28, paddingTop: 64, paddingBottom: 48 },
-  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  brandText: { color: c.ink, fontFamily: f.semi, fontSize: t.body, letterSpacing: 1.5 },
+  top: { flexDirection: 'row', justifyContent: 'flex-end' },
+  hero: { alignItems: 'center', marginTop: 28, marginBottom: 48 },
+  tagline: { color: c.ink3, fontFamily: f.reg, fontSize: t.body, marginTop: 8 },
+  brandText: { color: c.ink, fontFamily: f.semi, fontSize: t.h2, letterSpacing: 4, marginTop: 24 },
   lang: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: c.sheet, borderWidth: 1, borderColor: c.rule, paddingHorizontal: 12, paddingVertical: 7 },
   langText: { color: c.ink2, fontFamily: f.med, fontSize: t.label },
 
-  rate: { backgroundColor: c.hero, borderWidth: 1, borderColor: c.rule, padding: 22, marginBottom: 32, gap: 8 },
-  rateRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  rateVal: { color: c.ink, fontFamily: f.mono, fontSize: t.h1 },
-  gain: { color: c.gain, fontFamily: f.mono, fontSize: t.label },
-  band: { height: 2, backgroundColor: c.ruleStrong, marginTop: 4 },
-  bandDot: { position: 'absolute', top: -4, width: 10, height: 10, borderRadius: 5, backgroundColor: c.signal },
-  bandEnd: { color: c.ink3, fontFamily: f.mono, fontSize: t.meta },
 
   tabs: { flexDirection: 'row', backgroundColor: c.sheet, borderWidth: 1, borderColor: c.rule, padding: 4, marginBottom: 28 },
   tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 2 },
