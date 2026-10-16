@@ -2,7 +2,6 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
-import { GridBg } from '../components/Ledger';
 import Logo from '../components/Logo';
 import { c, f, t } from '../theme';
 
@@ -36,7 +35,6 @@ export default function Splash({ onDone }: { onDone: () => void }) {
 
   return (
     <Animated.View style={[s.wrap, { opacity: out }]}>
-      <GridBg color="rgba(255,255,255,.07)" />
       <Animated.View style={[s.glow, { opacity: glow, transform: [{ scale: glow.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }] }]}>
         <Svg width="100%" height="100%">
           <Defs>
