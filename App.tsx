@@ -7,6 +7,7 @@ import Login from './screens/Login';
 import Splash from './screens/Splash';
 import Dashboard from './screens/Dashboard';
 import Markets from './screens/Markets';
+import Wallet from './screens/Wallet';
 import TabBar, { Tab } from './components/TabBar';
 import { c, f } from './theme';
 import { GridBg } from './components/Ledger';
@@ -48,7 +49,7 @@ export default function App() {
         ) : (
           <>
             <View style={{ flex: 1 }}>
-              {tab === 'Home' ? <Dashboard /> : tab === 'Markets' ? <Markets /> : (
+              {tab === 'Home' ? <Dashboard /> : tab === 'Markets' ? <Markets /> : tab === 'Wallet' ? <Wallet /> : (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                   <Text style={{ color: c.ink3, fontFamily: f.med }}>{tab} — coming next</Text>
                 </View>
