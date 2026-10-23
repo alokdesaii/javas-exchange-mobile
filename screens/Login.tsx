@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { c, f, t } from '../theme';
+import { c, f, t, themed } from '../theme';
 import { CutButton } from '../components/Ledger';
 import Logo from '../components/Logo';
+import { TwoFactorStep, ForgotFlow, KycFlow } from './AuthSteps';
 
 function Field({ label, secure, hint, placeholder, prefix }: { label: string; secure?: boolean; hint?: string; placeholder?: string; prefix?: string }) {
   const [hidden, setHidden] = useState(true);
@@ -33,6 +34,11 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
   const [tab, setTab] = useState<'in' | 'up'>('in');
   const [type, setType] = useState<'Individual' | 'Corporate'>('Individual');
   const [remember, setRemember] = useState(false);
+  const [step, setStep] = useState<'form' | '2fa' | 'forgot' | 'kyc'>('form');
+
+  if (step === '2fa') return <TwoFactorStep onDone={onSignIn} onBack={() => setStep('form')} />;
+  if (step === 'forgot') return <ForgotFlow onBack={() => setStep('form')} />;
+  if (step === 'kyc') return <KycFlow corporate={type === 'Corporate'} onDone={onSignIn} onBack={() => setStep('form')} />;
 
   return (
     <ScrollView contentContainerStyle={s.wrap} keyboardShouldPersistTaps="handled">
@@ -63,9 +69,9 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
               <View style={[s.box, remember && s.boxOn]}>{remember && <Ionicons name="checkmark" size={12} color="#fff" />}</View>
               <Text style={s.body}>Remember me</Text>
             </Pressable>
-            <Text style={s.link}>Forgot password?</Text>
+            <Pressable onPress={() => setStep('forgot')} hitSlop={8}><Text style={s.link}>Forgot password?</Text></Pressable>
           </View>
-          <Primary title="Sign in" onPress={onSignIn} />
+          <Primary title="Sign in" onPress={() => setStep('2fa')} />
           <View style={s.or}><View style={s.rule} /><Text style={s.meta}>or continue with</Text><View style={s.rule} /></View>
           <View style={s.row}>
             <Pressable style={s.ghost}><Ionicons name="logo-google" size={16} color={c.ink} /><Text style={s.ghostText}>Google</Text></Pressable>
@@ -100,7 +106,7 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
             <View style={[s.box, remember && s.boxOn]}>{remember && <Ionicons name="checkmark" size={12} color="#fff" />}</View>
             <Text style={[s.body, { flex: 1 }]}>I agree to the <Text style={s.link}>Terms</Text>, <Text style={s.link}>Risk Disclosure</Text> and <Text style={s.link}>Privacy Policy</Text> of Javas Limited.</Text>
           </Pressable>
-          <Primary title="Create account" onPress={onSignIn} />
+          <Primary title="Create account" onPress={() => setStep('kyc')} />
         </>
       )}
 
@@ -109,7 +115,7 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => StyleSheet.create({
   wrap: { paddingHorizontal: 28, paddingTop: 64, paddingBottom: 48 },
   top: { flexDirection: 'row', justifyContent: 'flex-end' },
   hero: { alignItems: 'center', marginTop: 28, marginBottom: 48 },
@@ -148,4 +154,4 @@ const s = StyleSheet.create({
   ghostText: { color: c.ink, fontFamily: f.med, fontSize: t.body },
   meta: { color: c.ink3, fontFamily: f.med, fontSize: t.meta, letterSpacing: 0.8 },
   foot: { color: c.ink3, fontFamily: f.reg, fontSize: t.label, textAlign: 'center', marginTop: 24, lineHeight: 18 },
-});
+}));

@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Switch, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Corners, CutButton } from '../components/Ledger';
-import { c, f, t } from '../theme';
+import { c, f, t, themed } from '../theme';
+import { useNav } from '../components/Nav';
 
 // sym, name, total, available, inOrders, valueHKD, rate note, colour, glyph, tradable
 const ASSETS = [
   ['USDT', 'Tether', '318,420.00', '318,420.00', '—', 2491349.92, '@ 7.8241', '#26a17b', '₮', true],
-  ['HKD', 'Hong Kong Dollar', '1,924,200.00', '986,400.00', '937,800.00', 1924200, 'Cash', c.deep, 'HK$', false],
+  ['HKD', 'Hong Kong Dollar', '1,924,200.00', '986,400.00', '937,800.00', 1924200, 'Cash', '#5b45a8', 'HK$', false],
   ['BTC', 'Bitcoin', '2.1840', '1.9236', '0.2604', 1427862.86, '@ 653,783.36', '#f7931a', '₿', true],
   ['ETH', 'Ethereum', '34.6000', '34.6000', '—', 728870, '@ 21,065.61', '#627eea', 'Ξ', true],
   ['USDC', 'USD Coin', '21,400.00', '21,400.00', '—', 167343.72, '@ 7.8198', '#2775ca', '$', true],
@@ -19,10 +20,11 @@ const ASSETS = [
 ] as const;
 
 const TOTAL = 6755563.57;
-const ALLOC = [['USDT', 36.9, '#26a17b'], ['HKD', 28.5, c.deep], ['BTC', 21.1, '#f7931a'], ['ETH', 10.8, '#627eea'], ['USDC', 2.5, '#2775ca'], ['Other', 0.2, c.ink4]] as const;
+const ALLOC = [['USDT', 36.9, '#26a17b'], ['HKD', 28.5, '#5b45a8'], ['BTC', 21.1, '#f7931a'], ['ETH', 10.8, '#627eea'], ['USDC', 2.5, '#2775ca'], ['Other', 0.2, '#b4aeb8']] as const;
 const hk = (v: number) => v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function Wallet() {
+  const nav = useNav();
   const [hidden, setHidden] = useState(false);
   const [q, setQ] = useState('');
   const [hideSmall, setHideSmall] = useState(false);
@@ -40,7 +42,7 @@ export default function Wallet() {
           <Text style={s.kicker}>FIAT AND DIGITAL ASSETS</Text>
           <Text style={s.h1}>Wallet</Text>
         </View>
-        <Pressable style={s.iconBtn}><Ionicons name="time-outline" size={20} color={c.ink} /></Pressable>
+        <Pressable style={s.iconBtn} onPress={() => nav.open({ screen: 'transactions' })} accessibilityLabel="Transaction history"><Ionicons name="time-outline" size={20} color={c.ink} /></Pressable>
       </View>
 
       {/* Balance */}
@@ -64,8 +66,8 @@ export default function Wallet() {
         </View>
 
         <View style={[s.row, { gap: 10, marginTop: 22 }]}>
-          <CutButton title="Deposit" height={46} style={{ flex: 1 }} />
-          <Pressable style={s.ghost}><Text style={s.ghostText}>WITHDRAW</Text></Pressable>
+          <CutButton title="Deposit" height={46} style={{ flex: 1 }} onPress={() => nav.open({ screen: 'transfer', mode: 'deposit' })} />
+          <Pressable style={s.ghost} onPress={() => nav.open({ screen: 'transfer', mode: 'withdraw' })}><Text style={s.ghostText}>WITHDRAW</Text></Pressable>
           <Pressable style={s.ghost}><Text style={s.ghostText}>TRADE</Text></Pressable>
         </View>
       </View>
@@ -92,7 +94,7 @@ export default function Wallet() {
           <Text style={s.kicker}>YOUR ASSETS</Text>
           <View style={s.row}>
             <Text style={s.small}>HIDE &lt; HK$ 5K</Text>
-            <Switch value={hideSmall} onValueChange={setHideSmall} trackColor={{ true: c.deep, false: c.ruleStrong }} thumbColor="#fff" style={{ transform: [{ scale: 0.8 }] }} />
+            <Switch value={hideSmall} onValueChange={setHideSmall} trackColor={{ true: c.deep, false: c.ruleStrong }} thumbColor="#fff" {...{ activeThumbColor: "#fff" }} style={{ transform: [{ scale: 0.8 }] }} />
           </View>
         </View>
 
@@ -132,7 +134,7 @@ export default function Wallet() {
                     </View>
                     <View style={[s.row, { gap: 8 }]}>
                       {['Deposit', 'Withdraw', ...(tradable ? ['Trade'] : [])].map(a => (
-                        <Pressable key={a} style={[s.mini, a === 'Deposit' && s.miniOn]}>
+                        <Pressable key={a} style={[s.mini, a === 'Deposit' && s.miniOn]} onPress={() => a !== 'Trade' && nav.open({ screen: 'transfer', mode: a === 'Deposit' ? 'deposit' : 'withdraw', asset: sym })}>
                           <Text style={[s.miniText, a === 'Deposit' && { color: '#fff' }]}>{a.toUpperCase()}</Text>
                         </Pressable>
                       ))}
@@ -149,7 +151,7 @@ export default function Wallet() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => StyleSheet.create({
   wrap: { paddingHorizontal: 24, paddingTop: 64, paddingBottom: 130, gap: 32 },
   h1: { color: c.ink, fontFamily: f.semi, fontSize: t.h1, marginTop: 4 },
   kicker: { color: c.ink3, fontFamily: f.mono, fontSize: 10, letterSpacing: 1.2 },
@@ -189,4 +191,4 @@ const s = StyleSheet.create({
   sub: { color: c.ink3, fontFamily: f.reg, fontSize: t.label, marginTop: 3 },
   small: { color: c.ink3, fontFamily: f.mono, fontSize: 10 },
   mono: { color: c.ink, fontFamily: f.mono, fontSize: t.body },
-});
+}));

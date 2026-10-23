@@ -3,7 +3,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Corners } from './Ledger';
-import { c, f } from '../theme';
+import { c, f, themed } from '../theme';
 
 export const tabs = [
   ['Home', 'home'],
@@ -31,12 +31,12 @@ export default function TabBar({ active, onChange }: { active: Tab; onChange: (t
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => StyleSheet.create({
   bar: {
     position: 'absolute', left: 20, right: 20, bottom: 28,
-    flexDirection: 'row', backgroundColor: c.deep, padding: 6,
+    flexDirection: 'row', backgroundColor: '#25165b', padding: 6,
   },
   item: { flex: 1, height: 54, alignItems: 'center', justifyContent: 'center', gap: 5 },
   itemOn: { backgroundColor: 'rgba(255,255,255,.08)' },
   text: { color: 'rgba(255,255,255,.5)', fontFamily: f.mono, fontSize: 9, letterSpacing: 0.8 },
-});
+}));

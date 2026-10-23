@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { c, f, t } from '../theme';
+import { c, f, t, themed } from '../theme';
 import { Corners } from '../components/Ledger';
+import { useNav } from '../components/Nav';
 
 const lists = {
   Hot: [['₮', 'USDT', 'Tether', '7.8241', '+4 bps'], ['₿', 'BTC', 'Bitcoin', '83,560.20', '+1.82%'], ['Ξ', 'ETH', 'Ethereum', '2,692.40', '+0.61%'], ['◎', 'SOL', 'Solana', '117.17', '-0.18%']],
@@ -12,19 +13,19 @@ const lists = {
 };
 
 const activity = [
-  ['arrow-down', 'Deposit from HSBC', '2h ago', '+ HK$ 2,000,000', c.gain],
-  ['swap-horizontal', 'P2P · Buy USDT', '1d ago', 'HK$ 78,240', c.ink],
-  ['arrow-up', 'Withdrawal · 1.20 BTC', '12d ago', '− HK$ 784,120', c.ink],
+  ['arrow-down', 'Deposit from HSBC', '2h ago', '+ HK$ 2,000,000', 'gain'],
+  ['swap-horizontal', 'P2P · Buy USDT', '1d ago', 'HK$ 78,240', 'ink'],
+  ['arrow-up', 'Withdrawal · 1.20 BTC', '12d ago', '− HK$ 784,120', 'ink'],
 ] as const;
 
-const actions = [['arrow-down', 'Deposit'], ['arrow-up', 'Withdraw'], ['people-outline', 'P2P'], ['leaf-outline', 'Earn']] as const;
+const actions = [['arrow-down', 'Deposit'], ['arrow-up', 'Withdraw'], ['people-outline', 'P2P'], ['leaf-outline', 'Earn'], ['trending-up', 'Futures']] as const;
 
-function Section({ title, link, children }: { title: string; link?: string; children: React.ReactNode }) {
+function Section({ title, link, onLink, children }: { title: string; link?: string; onLink?: () => void; children: React.ReactNode }) {
   return (
     <View>
       <View style={s.sectionHead}>
         <Text style={s.kicker}>{title.toUpperCase()}</Text>
-        {link && <Text style={s.link}>{link}</Text>}
+        {link && <Pressable onPress={onLink} hitSlop={8}><Text style={s.link}>{link}</Text></Pressable>}
       </View>
       {children}
     </View>
@@ -32,6 +33,7 @@ function Section({ title, link, children }: { title: string; link?: string; chil
 }
 
 export default function Dashboard() {
+  const { open } = useNav();
   const [hidden, setHidden] = useState(false);
   const [tab, setTab] = useState<keyof typeof lists>('Hot');
   const mask = (v: string) => (hidden ? '••••••' : v);
@@ -43,7 +45,7 @@ export default function Dashboard() {
           <Text style={s.hello}>Good morning</Text>
           <Text style={s.name}>Wing Chan</Text>
         </View>
-        <Pressable style={s.iconBtn}>
+        <Pressable style={s.iconBtn} onPress={() => open({ screen: 'notifications' })} accessibilityLabel="Notifications, 4 unread">
           <Ionicons name="notifications-outline" size={20} color={c.ink} />
           <View style={s.dot} />
         </Pressable>
@@ -61,7 +63,7 @@ export default function Dashboard() {
 
         <View style={s.actions}>
           {actions.map(([icon, label]) => (
-            <Pressable key={label} style={s.action}>
+            <Pressable key={label} style={s.action} onPress={() => label === 'P2P' ? open({ screen: 'p2p' }) : label === 'Earn' || label === 'Futures' ? open({ screen: 'product', product: label }) : (label === 'Deposit' || label === 'Withdraw') && open({ screen: 'transfer', mode: label === 'Deposit' ? 'deposit' : 'withdraw' })}>
               <View style={[s.actionIcon, label === 'Deposit' && { backgroundColor: c.signal, borderColor: c.signal }]}>
                 <Ionicons name={icon} size={20} color={label === 'Deposit' ? '#fff' : c.deep} />
               </View>
@@ -98,7 +100,7 @@ export default function Dashboard() {
       </Section>
 
       {/* Activity */}
-      <Section title="Recent activity" link="See all">
+      <Section title="Recent activity" link="See all" onLink={() => open({ screen: 'transactions' })}>
         <View style={s.card}>
           {activity.map(([icon, title, when, amt, col], i) => (
             <View key={title} style={[s.listRow, i > 0 && s.divider]}>
@@ -107,7 +109,7 @@ export default function Dashboard() {
                 <Text style={s.body} numberOfLines={1}>{title}</Text>
                 <Text style={s.sub}>{when}</Text>
               </View>
-              <Text style={[s.amt, { color: col }]}>{mask(amt)}</Text>
+              <Text style={[s.amt, { color: c[col] }]}>{mask(amt)}</Text>
             </View>
           ))}
         </View>
@@ -126,7 +128,7 @@ export default function Dashboard() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => StyleSheet.create({
   // bottom padding clears the floating tab bar
   wrap: { paddingHorizontal: 24, paddingTop: 64, paddingBottom: 130, gap: 32 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -143,7 +145,7 @@ const s = StyleSheet.create({
   pillText: { color: c.gain, fontFamily: f.mono, fontSize: t.label },
   actions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 28 },
   action: { alignItems: 'center', gap: 8, flex: 1 },
-  actionIcon: { width: 52, height: 52, borderWidth: 1, borderColor: c.rule, backgroundColor: c.sheet, alignItems: 'center', justifyContent: 'center' },
+  actionIcon: { width: 46, height: 46, borderWidth: 1, borderColor: c.rule, backgroundColor: c.sheet, alignItems: 'center', justifyContent: 'center' },
   actionText: { color: c.ink2, fontFamily: f.med, fontSize: t.label },
 
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
@@ -168,4 +170,4 @@ const s = StyleSheet.create({
   amt: { fontFamily: f.semi, fontSize: t.body },
   mono: { color: c.ink, fontFamily: f.mono, fontSize: t.body },
   change: { fontFamily: f.mono, fontSize: t.label, marginTop: 3 },
-});
+}));

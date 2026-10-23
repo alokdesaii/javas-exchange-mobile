@@ -1,4 +1,5 @@
 // The web app's "ledger" design language: column rules, corner brackets, cut-corner buttons.
+import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { c, f } from '../theme';
@@ -31,16 +32,18 @@ export function Corners({ color = c.ink3, inset = 9, size = 8, weight = 1 }: { c
 const CUT = 9;
 const BTN = '#d4434b'; // coral one step deeper, as on the web CTA, for white-text contrast
 
-// Primary CTA: top-right and bottom-left corners cut at 45°.
+// Primary CTA: top-right and bottom-left corners cut at 45°, sized in real pixels.
 export function CutButton({ title, onPress, style, height = 52 }: { title: string; onPress?: () => void; style?: ViewStyle; height?: number }) {
+  const [w, setW] = useState(0);
   return (
-    <Pressable onPress={onPress} style={[{ height, justifyContent: 'center', alignItems: 'center' }, style]}>
+    <Pressable onPress={onPress} onLayout={e => setW(e.nativeEvent.layout.width)} style={[{ height, justifyContent: 'center', alignItems: 'center' }, style]}>
       {({ pressed }) => (
         <>
-          <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
-            {/* ponytail: viewBox stretch makes the cut slightly non-45° on wide buttons; measure with onLayout if anyone notices */}
-            <Polygon points={`0,0 ${100 - CUT / 3},0 100,${CUT * 1.8} 100,100 ${CUT / 3},100 0,${100 - CUT * 1.8}`} fill={pressed ? c.signal : BTN} />
-          </Svg>
+          {w > 0 && (
+            <Svg style={StyleSheet.absoluteFill} width={w} height={height}>
+              <Polygon points={`0,0 ${w - CUT},0 ${w},${CUT} ${w},${height} ${CUT},${height} 0,${height - CUT}`} fill={pressed ? c.signal : BTN} />
+            </Svg>
+          )}
           <Text style={s.cutText}>{title}</Text>
         </>
       )}

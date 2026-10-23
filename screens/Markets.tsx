@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Corners } from '../components/Ledger';
-import { c, f, t } from '../theme';
+import { c, f, t, themed } from '../theme';
+import { useNav } from '../components/Nav';
 
 // sym, name, quote, category, price, 24h %, low, high, volume (HK$), colour, glyph
-const ASSETS = ([
+export const ASSETS = ([
   ['BTC', 'Bitcoin', 'USDT', 'Layer 1', 83560.2, 1.82, 81940, 84210, 1.24e9, '#f7931a', '₿'],
   ['USDT', 'Tether', 'HKD', 'Stablecoin', 7.8241, 0.04, 7.818, 7.829, 412.8e6, '#26a17b', '₮'],
   ['ETH', 'Ethereum', 'USDT', 'Layer 1', 2692.4, -0.61, 2668, 2741, 684.1e6, '#627eea', 'Ξ'],
@@ -33,8 +34,8 @@ const PEG = [['DAI', 7.8164], ['USDC', 7.8198], ['USDT', 7.8241]] as const;
 
 const FILTERS = ['All', 'Watchlist', 'Layer 1', 'DeFi', 'Meme', 'Stablecoin', 'Gainers', 'Losers'] as const;
 
-const fmtPx = (p: number) => p < 0.001 ? p.toFixed(8) : p < 1 ? p.toFixed(4) : p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: p < 10 ? 4 : 2 });
-const fmtVol = (v: number) => v >= 1e9 ? `${(v / 1e9).toFixed(2)}B` : `${(v / 1e6).toFixed(1)}M`;
+export const fmtPx = (p: number) => p < 0.001 ? p.toFixed(8) : p < 1 ? p.toFixed(4) : p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: p < 10 ? 4 : 2 });
+export const fmtVol = (v: number) => v >= 1e9 ? `${(v / 1e9).toFixed(2)}B` : `${(v / 1e6).toFixed(1)}M`;
 
 export default function Markets() {
   const [q, setQ] = useState('');
@@ -46,6 +47,7 @@ export default function Markets() {
     .filter(a => filter === 'All' || (filter === 'Watchlist' ? watch.has(a.sym) : filter === 'Gainers' ? a.chg > 0 : filter === 'Losers' ? a.chg < 0 : a.cat === filter))
     .sort((a, b) => filter === 'Gainers' ? b.chg - a.chg : filter === 'Losers' ? a.chg - b.chg : b.vol - a.vol);
 
+  const { open } = useNav();
   const toggle = (sym: string) => setWatch(w => { const n = new Set(w); n.has(sym) ? n.delete(sym) : n.add(sym); return n; });
 
   return (
@@ -123,7 +125,7 @@ export default function Markets() {
         ) : rows.map(a => {
           const up = a.chg >= 0;
           return (
-            <View key={a.sym} style={s.row}>
+            <Pressable key={a.sym} style={s.row} onPress={() => open({ screen: 'asset', sym: a.sym })}>
               <Pressable onPress={() => toggle(a.sym)} hitSlop={8}>
                 <Ionicons name={watch.has(a.sym) ? 'star' : 'star-outline'} size={15} color={watch.has(a.sym) ? c.flag : c.ink4} />
               </Pressable>
@@ -138,7 +140,7 @@ export default function Markets() {
                   <Text style={[s.chgText, { color: up ? c.gain : c.loss }]}>{up ? '▲' : '▼'} {Math.abs(a.chg).toFixed(2)}%</Text>
                 </View>
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </View>
@@ -146,7 +148,7 @@ export default function Markets() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => StyleSheet.create({
   wrap: { paddingHorizontal: 24, paddingTop: 64, paddingBottom: 130, gap: 24 },
   h1: { color: c.ink, fontFamily: f.semi, fontSize: t.h1, marginTop: 4 },
   kicker: { color: c.ink3, fontFamily: f.mono, fontSize: 10, letterSpacing: 1.2 },
@@ -185,4 +187,4 @@ const s = StyleSheet.create({
   small: { color: c.ink3, fontFamily: f.mono, fontSize: 10 },
   mono: { color: c.ink, fontFamily: f.mono, fontSize: t.body },
   link: { color: c.signal, fontFamily: f.med, fontSize: t.body },
-});
+}));
